@@ -12,7 +12,7 @@ PDF_PATH = (
     / "arogya_shield_policy_handbook.pdf"
 )
 
-CHROMA_PATH = PROJECT_ROOT / "chromadb"
+CHROMA_PATH = PROJECT_ROOT / "chroma_db"
 
 
 # ChromaDB settings
