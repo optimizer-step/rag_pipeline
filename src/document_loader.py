@@ -54,4 +54,4 @@ def load_pdf_pages(
             "The PDF may require OCR."
         )
 
-    return page
+    return pages
