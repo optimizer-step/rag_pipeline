@@ -1,12 +1,16 @@
 """Prepare retrieved evidence and generate a grounded answer."""
 
+import os
 from typing import Any
 
 from ollama import chat
+from openai import OpenAI
 
 from .config import (
     FINAL_TOP_K,
+    GENERATION_PROVIDER,
     OLLAMA_MODEL_NAME,
+    OPENAI_MODEL_NAME,
 )
 
 
@@ -128,25 +132,17 @@ def build_context(
     return "\n\n".join(context_blocks)
 
 
-def generate_answer(
+def build_user_prompt(
     question: str,
     final_evidence: list[dict[str, Any]],
-    model_name: str = OLLAMA_MODEL_NAME,
 ) -> str:
-    """Generate a citation-backed answer using local Qwen."""
-
-    question = question.strip()
-
-    if not question:
-        raise ValueError(
-            "The user question cannot be empty."
-        )
+    
 
     context = build_context(
         final_evidence
     )
 
-    user_prompt = f"""
+    return f"""
 USER QUESTION:
 {question}
 
@@ -156,6 +152,36 @@ RETRIEVED EVIDENCE:
 Answer the question using only the retrieved evidence.
 Cite every supported claim using [Page X].
 """.strip()
+
+
+def generate_with_openai(
+    user_prompt: str,
+    model_name: str = OPENAI_MODEL_NAME,
+) -> str:
+    
+
+    if not os.getenv("OPENAI_API_KEY"):
+        raise RuntimeError(
+            "OPENAI_API_KEY is required when "
+            "GENERATION_PROVIDER is set to openai."
+        )
+
+    client = OpenAI()
+
+    response = client.responses.create(
+        model=model_name,
+        instructions=SYSTEM_PROMPT,
+        input=user_prompt,
+    )
+
+    return response.output_text.strip()
+
+
+def generate_with_ollama(
+    user_prompt: str,
+    model_name: str = OLLAMA_MODEL_NAME,
+) -> str:
+    """Generate an answer using local Ollama."""
 
     response = chat(
         model=model_name,
@@ -175,11 +201,44 @@ Cite every supported claim using [Page X].
         },
     )
 
-    answer = response.message.content.strip()
+    return response.message.content.strip()
+
+
+def generate_answer(
+    question: str,
+    final_evidence: list[dict[str, Any]],
+) -> str:
+    """Generate an answer using the configured provider."""
+
+    question = question.strip()
+
+    if not question:
+        raise ValueError(
+            "The user question cannot be empty."
+        )
+
+    user_prompt = build_user_prompt(
+        question=question,
+        final_evidence=final_evidence,
+    )
+
+    if GENERATION_PROVIDER == "openai":
+        answer = generate_with_openai(
+            user_prompt
+        )
+    elif GENERATION_PROVIDER == "ollama":
+        answer = generate_with_ollama(
+            user_prompt
+        )
+    else:
+        raise ValueError(
+            "GENERATION_PROVIDER must be "
+            "'openai' or 'ollama'."
+        )
 
     if not answer:
         raise ValueError(
-            "The local model returned an empty answer."
+            "The language model returned an empty answer."
         )
 
     return answer
