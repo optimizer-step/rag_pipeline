@@ -2,6 +2,7 @@ pymupdf
 langchain-text-splitters
 sentence-transformers
 chromadb
+openai
 ollama
 numpy
 torch
