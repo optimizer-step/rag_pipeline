@@ -1,7 +1,7 @@
 """Central configuration for the RAG project."""
 
 from pathlib import Path
-
+import os
 
 # Project folders
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -26,8 +26,7 @@ EMBEDDING_MODEL_NAME = (
 )
 
 
-# Local language model
-OLLAMA_MODEL_NAME = "qwen3.5:4b-q4_K_M"
+
 
 
 # Chunking settings
@@ -39,3 +38,19 @@ CHUNK_OVERLAP = 80
 RESULTS_PER_QUERY = 8
 FINAL_TOP_K = 6
 RRF_K = 60  
+
+
+GENERATION_PROVIDER = os.getenv(
+    "GENERATION_PROVIDER",
+    "openai",
+).strip().lower()
+
+OPENAI_MODEL_NAME = os.getenv(
+    "OPENAI_MODEL",
+    "gpt-5.6-luna",
+).strip()
+
+OLLAMA_MODEL_NAME = os.getenv(
+    "OLLAMA_MODEL_NAME",
+    "qwen3.5:4b-q4_K_M",
+).strip()
