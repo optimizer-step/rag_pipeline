@@ -3,6 +3,7 @@ langchain-text-splitters
 sentence-transformers
 chromadb
 openai
+streamlit
 ollama
 numpy
 torch
