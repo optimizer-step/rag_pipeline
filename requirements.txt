@@ -4,6 +4,7 @@ sentence-transformers
 chromadb
 python-dotenv
 openai
+pytest
 streamlit
 ollama
 numpy

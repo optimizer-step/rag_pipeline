@@ -3,3 +3,5 @@ chromadb/
 .ipynb_checkpoints/
 __pycache__/
 chroma_db/
+.pytest_cache/
+pytest-cache-files-*/
